@@ -16,7 +16,7 @@ RUN chown -R www:www /www
 RUN mkdir -p /run/nginx
 
 # Create SSL
-RUN adduser -D admin
+mkdir -p /ftps/admin
 RUN echo "admin:password" | chpasswd
 RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "/C=FR/ST=AuvergneRhone-alpes/L=Lyon/O=tcluadel/OU=tclaudel/CN=tclaudel" -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt
 

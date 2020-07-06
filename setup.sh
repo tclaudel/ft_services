@@ -66,8 +66,12 @@ function check_fail {
 
 function nginx_service {
   docker build -t ft_nginx $WORKING_DIR/srcs/nginx
-  eval $(minikube docker-env);
   kubectl apply -f $WORKING_DIR/srcs/nginx/srcs/nginx.yaml
+}
+
+function ftps_service {
+  docker build -t ft_ftps $WORKING_DIR/srcs/ftps
+  kubectl apply -f $WORKING_DIR/srcs/ftps/srcs/ftps.yaml
 }
 
 function install_metallb {
@@ -79,7 +83,9 @@ function install_metallb {
 
 SERVICES=(
   nginx
+  ftps
 )
+MINIKUBE_IP=`minikube ip`
 
 export SERVICES
 if [[ $1 == "reset" ]]; then
@@ -93,7 +99,8 @@ install_minikube;
 starting_minikube;
 create_namespace;
 #setup_ingress_controller;
+eval $(minikube docker-env);
 install_metallb;
 nginx_service;
-
+ftps_service;
 
