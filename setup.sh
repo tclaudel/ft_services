@@ -1,14 +1,7 @@
 #!/usr/bin/env bash
 
 function install_kubectl {
-    KUBECTL_CHECK=`kubectl version --client`;
-    if [[ ! -n KUBECTL_CHECK ]]; then
-      curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl;
-      chmod +x ./kubectl;
-      sudo mv ./kubectl /usr/local/bin/kubectl;
-    fi
-    kubectl version --client > /dev/null;
-    check_fail "installation of kubectl";
+    minikube kubectl
 }
 
 function install_minikube {
@@ -66,6 +59,7 @@ function check_fail {
 
 function nginx_service {
   docker build -t ft_nginx $WORKING_DIR/srcs/nginx
+  docker images ls
   kubectl apply -f $WORKING_DIR/srcs/nginx/srcs/nginx.yaml
 }
 
@@ -94,6 +88,7 @@ fi
 #minikube -p minikube docker-env
 WORKING_DIR=$PWD;
 NAMESPACE=$USER;
+eval $(minikube docker-env);
 install_kubectl;
 install_minikube;
 starting_minikube;

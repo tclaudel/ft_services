@@ -12,12 +12,9 @@ spec:
     - name: ftps
       port: 21
       targetPort: 21
-    - name: begin
-      port: 21000
-      targetPort: 21000
-    - name: end
-      port: 21001
-      targetPort: 21001
+    - name: data
+      port: 1024
+      targetPort: 1024
 ---
 apiVersion: apps/v1
 kind: Deployment

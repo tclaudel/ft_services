@@ -6,13 +6,13 @@ RUN apk add vsftpd \
     && apk add bash
 
 # SSL certificate
-RUN mkdir -p /etc/ssl-vsftpd/private
-RUN chmod 700 /etc/ssl-vsftpd/private
+RUN mkdir -p /var/log/ftp/
 RUN openssl req -x509 -nodes -days 365 -newkey rsa:4096 -subj "/C=FR/ST=AuvergneRhone-alpes/L=Lyon/O=tcluadel/OU=tclaudel/CN=tclaudel" -keyout /etc/ssl/private/vsftpd.pem -out /etc/ssl/private/vsftpd.pem
 COPY srcs/vsftpd.conf /etc/vsftpd/vsftpd.conf
 
-COPY srcs/setup_ftps.sh /
-RUN chmod +x setup_ftps.sh
-CMD ./setup_ftps.sh
+RUN adduser -D admin
+RUN echo "admin:password" | chpasswd
 
-EXPOSE 20 21 21000-21001
+CMD /usr/sbin/vsftpd /etc/vsftpd/vsftpd.conf
+
+EXPOSE 21 1024
