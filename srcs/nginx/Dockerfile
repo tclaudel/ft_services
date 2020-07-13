@@ -5,7 +5,7 @@ RUN apk add openssl \
     && apk add nginx \
     && apk add openssh \
     && apk add bash \
-    && apk add zsh
+    && apk add zsh --no-cache
 
 RUN adduser -D -g www www
 

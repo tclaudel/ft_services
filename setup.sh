@@ -31,14 +31,6 @@ function create_namespace {
   kubectl create namespace $NAMESPACE;
 }
 
-function setup_ingress_controller {
-  minikube addons enable ingress
-  check_fail "setup ingress controller"
-  kubectl apply -f ./srcs/ingress_controller/ingress_controller.yaml --namespace=$NAMESPACE > /dev/null
-  kubectl get ingress --namespace=$NAMESPACE > /dev/null
-  check_fail "apply ingress_controller.yaml"
-}
-
 function reset {
 #  minikube stop;
 #  rm -Rf ~/.minikube
@@ -96,7 +88,6 @@ fi
 WORKING_DIR=$PWD;
 NAMESPACE=$USER;
 eval $(minikube docker-env);
-
 install_minikube;
 starting_minikube;
 install_kubectl;

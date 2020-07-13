@@ -3,7 +3,7 @@ FROM alpine:latest
 RUN apk -U upgrade --no-cache
 RUN apk add vsftpd \
     && apk add openssl \
-    && apk add bash
+    && apk add bash --no-cache
 
 # SSL certificate
 RUN mkdir -p /var/log/ftp/
