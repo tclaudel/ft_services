@@ -96,10 +96,10 @@ fi
 WORKING_DIR=$PWD;
 NAMESPACE=$USER;
 eval $(minikube docker-env);
-echo "[1] install kubectl"
-install_kubectl;
+
 install_minikube;
 starting_minikube;
+install_kubectl;
 create_namespace;
 #setup_ingress_controller;
 eval $(minikube docker-env);
