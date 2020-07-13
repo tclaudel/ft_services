@@ -41,7 +41,7 @@ function setup_ingress_controller {
 
 function reset {
 #  minikube stop;
-#  kubectl delete svc nginx-ssh
+#  rm -Rf ~/.minikube
   kubectl delete cm config-metallb -n metallb-system
   for SERVICE in ${SERVICES[@]}
   do
@@ -68,6 +68,11 @@ function ftps_service {
   kubectl apply -f $WORKING_DIR/srcs/ftps/srcs/ftps.yaml
 }
 
+function wordpress_service {
+  docker build -t ft_wordpress $WORKING_DIR/srcs/wordpress
+  kubectl apply -f $WORKING_DIR/srcs/wordpress/srcs/wordpress.yaml
+}
+
 function install_metallb {
   kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml
   kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/metallb.yaml
@@ -78,7 +83,9 @@ function install_metallb {
 SERVICES=(
   nginx
   ftps
+  wordpress
 )
+
 MINIKUBE_IP=`minikube ip`
 
 export SERVICES
@@ -89,6 +96,7 @@ fi
 WORKING_DIR=$PWD;
 NAMESPACE=$USER;
 eval $(minikube docker-env);
+echo "[1] install kubectl"
 install_kubectl;
 install_minikube;
 starting_minikube;
@@ -98,4 +106,5 @@ eval $(minikube docker-env);
 install_metallb;
 nginx_service;
 ftps_service;
+wordpress_service;
 

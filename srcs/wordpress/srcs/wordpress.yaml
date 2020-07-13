@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+spec:
+  type: LoadBalancer
+  ports:
+    - name: http
+      port: 5050
+      targetPort: 5050
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+  template:
+    metadata:
+      labels:
+        app: wordpress
+    spec:
+      containers:
+        - name: wordpress
+          image: ft_wordpress
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5050
+          livenessProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            tcpSocket:
+              port: 5050
+          volumeMounts:
+            - name: wordpress-data
+              mountPath: /var/www/html
+            - name: wordpress-config
+              mountPath: /var/www/localhost/htdocs/wp-config.php
+              subPath: wp-config.php
+              readOnly: true
+      volumes:
+        - name: wordpress-config
+          configMap:
+            name: wordpress
+        - name: wordpress-data
+          persistentVolumeClaim:
+            claimName: wordpress
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+data:
+  wp-config.php: |
+    <?php
+    define('DB_NAME', 'wordpress');
+    define('DB_USER', 'wp-admin');
+    define('DB_PASSWORD', 'password');
+    define('DB_HOST', 'mysql');
+    define('DB_CHARSET', 'utf8');
+    define('DB_COLLATE', '');
+
+    $table_prefix = 'wp_';
+
+    define('WP_DEBUG', false);
+
+    if (!defined('ABSPATH')) {
+      define('ABSPATH', dirname( __FILE__ ) . '/');
+    }
+
+    require_once(ABSPATH . 'wp-settings.php');
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
