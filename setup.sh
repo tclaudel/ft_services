@@ -70,6 +70,11 @@ function mysql_service {
   kubectl apply -f $WORKING_DIR/srcs/mysql/srcs/mysql.yaml
 }
 
+function phpmyadmin_service {
+  docker build -t ft_phpmyadmin $WORKING_DIR/srcs/phpmyadmin
+  kubectl apply -f $WORKING_DIR/srcs/phpmyadmin/srcs/phpmyadmin.yaml
+}
+
 function install_metallb {
   kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml
   kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/metallb.yaml
@@ -82,6 +87,7 @@ SERVICES=(
   ftps
   wordpress
   wordpress-mysql
+  phpmyadmin
 )
 
 MINIKUBE_IP=`minikube ip`
@@ -105,4 +111,4 @@ nginx_service;
 ftps_service;
 wordpress_service;
 mysql_service;
-
+phpmyadmin_service;
