@@ -34,7 +34,7 @@ function create_namespace {
 function reset {
 #  minikube stop;
 #  rm -Rf ~/.minikube
-  kubectl delete cm config-metallb -n metallb-system
+  kubectl delete cm config -n metallb-system
   for SERVICE in ${SERVICES[@]}
   do
     kubectl delete svc $SERVICE
@@ -56,6 +56,7 @@ function nginx_service {
 }
 
 function ftps_service {
+  sed "s/FTPS_IP/"$MINIKUBE_IP.$((START+1))"/" srcs/ftps/srcs/template_vsftpd.conf > srcs/ftps/srcs/vsftpd.conf
   docker build -t ft_ftps $WORKING_DIR/srcs/ftps
   kubectl apply -f $WORKING_DIR/srcs/ftps/srcs/ftps.yaml
 }
@@ -66,7 +67,7 @@ function wordpress_service {
 }
 
 function mysql_service {
-  docker build -t ft_wordpress $WORKING_DIR/srcs/mysql
+  docker build -t ft_mysql $WORKING_DIR/srcs/mysql
   kubectl apply -f $WORKING_DIR/srcs/mysql/srcs/mysql.yaml
 }
 
@@ -76,21 +77,29 @@ function phpmyadmin_service {
 }
 
 function install_metallb {
+
+  sed "s/IPADDRESSES/"$MINIKUBE_IP.$START-$MINIKUBE_IP.254"/" srcs/metallb/template_metallb.yaml > srcs/metallb/metallb.yaml
   kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml
   kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/metallb.yaml
   kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
   kubectl apply -f $WORKING_DIR/srcs/metallb/metallb.yaml
 }
 
+function @ {
+  printf "[$I] $1\n"
+  ((I++))
+  eval $1
+}
+
 SERVICES=(
   nginx
   ftps
   wordpress
-  wordpress-mysql
+  mysql
   phpmyadmin
 )
 
-MINIKUBE_IP=`minikube ip`
+
 
 export SERVICES
 if [[ $1 == "reset" ]]; then
@@ -99,16 +108,19 @@ fi
 #minikube -p minikube docker-env
 WORKING_DIR=$PWD;
 NAMESPACE=$USER;
+I=0
 eval $(minikube docker-env);
-install_minikube;
-starting_minikube;
-install_kubectl;
-create_namespace;
+@ install_minikube;
+@ starting_minikube;
+MINIKUBE_IP=`minikube ip | cut -d '.' -f 1-3`
+START=`minikube ip | cut -d '.' -f 4`
+@ install_kubectl;
+@ create_namespace;
 #setup_ingress_controller;
-eval $(minikube docker-env);
-install_metallb;
-nginx_service;
-ftps_service;
-wordpress_service;
-mysql_service;
-phpmyadmin_service;
+@ eval $(minikube docker-env);
+@ install_metallb;
+@ nginx_service;
+@ ftps_service;
+@ wordpress_service;
+@ mysql_service;
+@ phpmyadmin_service;
