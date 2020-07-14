@@ -65,6 +65,11 @@ function wordpress_service {
   kubectl apply -f $WORKING_DIR/srcs/wordpress/srcs/wordpress.yaml
 }
 
+function mysql_service {
+  docker build -t ft_wordpress $WORKING_DIR/srcs/mysql
+  kubectl apply -f $WORKING_DIR/srcs/mysql/srcs/mysql.yaml
+}
+
 function install_metallb {
   kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml
   kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/metallb.yaml
@@ -76,6 +81,7 @@ SERVICES=(
   nginx
   ftps
   wordpress
+  wordpress-mysql
 )
 
 MINIKUBE_IP=`minikube ip`
@@ -98,4 +104,5 @@ install_metallb;
 nginx_service;
 ftps_service;
 wordpress_service;
+mysql_service;
 
