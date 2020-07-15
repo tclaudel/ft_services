@@ -3,11 +3,12 @@ kind: Service
 metadata:
   name: phpmyadmin
   labels:
-    app: phpmyadmin
+    app: wordpress
 spec:
   type: LoadBalancer
   selector:
-    app: phpmyadmin
+    app: wordpress
+    tier: wordpress
   ports:
     - name: http
       port: 5000

@@ -1,13 +1,51 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-mysql_install_db --user=__DB_USER__
-tmp=sql_tmp
+if [ ! -d "/run/mysqld" ]; then
+  mkdir -p /run/mysqld
+fi
 
-echo -ne "FLUSH PRIVILEGES;\n
-GRANT ALL PRIVILEGES ON *.* TO '__DB_USER__'@'%' IDENTIFIED BY '__DB_PASSWORD__' WITH GRANT OPTION;\n
-FLUSH PRIVILEGES;\n" >> $tmp
+if [ -d /app/mysql ]; then
+  echo "[i] MySQL directory already present, skipping creation"
+else
+  echo "[i] MySQL data directory not found, creating initial DBs"
 
-/usr/bin/mysqld --user=__DB_USER__ --bootstrap --verbose=0 < $tmp
-rm -rf $tmp
+  mysql_install_db --user=root > /dev/null
 
-exec /usr/bin/mysqld --user=__DB_USER__
+  if [ "$MYSQL_ROOT_PASSWORD" = "" ]; then
+    MYSQL_ROOT_PASSWORD=root
+    echo "[i] MySQL root Password: $MYSQL_ROOT_PASSWORD"
+  fi
+
+  MYSQL_DATABASE="wp_db"
+  MYSQL_USER="wp_user"
+  MYSQL_PASSWORD="admin"
+
+  tfile=`mktemp`
+  if [ ! -f "$tfile" ]; then
+      return 1
+  fi
+
+  cat << EOF > $tfile
+USE mysql;
+FLUSH PRIVILEGES;
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY "$MYSQL_ROOT_PASSWORD" WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'localhost' WITH GRANT OPTION;
+ALTER USER 'root'@'localhost' IDENTIFIED BY '';
+EOF
+
+  if [ "$MYSQL_DATABASE" != "" ]; then
+    echo "[i] Creating database: $MYSQL_DATABASE"
+    echo "CREATE DATABASE IF NOT EXISTS \`$MYSQL_DATABASE\` CHARACTER SET utf8 COLLATE utf8_general_ci;" >> $tfile
+
+    if [ "$MYSQL_USER" != "" ]; then
+      echo "[i] Creating user: $MYSQL_USER with password $MYSQL_PASSWORD"
+      echo "GRANT ALL ON \`$MYSQL_DATABASE\`.* to '$MYSQL_USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';" >> $tfile
+    fi
+  fi
+
+  /usr/bin/mysqld --user=root --bootstrap --verbose=0 < $tfile
+  rm -f $tfile
+fi
+
+chmod 777 -R /var/lib/mysql
+exec /usr/bin/mysqld --user=root --console

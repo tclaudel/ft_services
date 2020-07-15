@@ -3,11 +3,12 @@ kind: Service
 metadata:
   name: mysql
   labels:
-    app: mysql
+    app: wordpress
 spec:
   type: LoadBalancer
   selector:
-    app: mysql
+    app: wordpress
+    tier: wordpress
   ports:
     - name: mysql
       port: 3306

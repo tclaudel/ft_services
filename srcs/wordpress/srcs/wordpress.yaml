@@ -8,6 +8,7 @@ spec:
   type: LoadBalancer
   selector:
     app: wordpress
+    tier: wordpress
   ports:
     - name: http
       port: 5050
