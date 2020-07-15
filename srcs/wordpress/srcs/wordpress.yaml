@@ -29,7 +29,14 @@ spec:
       labels:
         app: wordpress
     spec:
+      volumes:
+        - name: wordpress-pv-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
       containers:
         - name: wordpress
           image: ft_wordpress
           imagePullPolicy: Never
+          volumeMounts:
+            - name: wordpress-pv-storage
+              mountPath: "/var/lib/mysql"

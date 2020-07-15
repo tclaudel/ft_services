@@ -49,6 +49,10 @@ function check_fail {
   fi
 }
 
+function volumes_setup {
+  kubectl apply -f $WORKING_DIR/srcs/volumes/volume_mysql.yaml
+}
+
 function nginx_service {
   docker build -t ft_nginx $WORKING_DIR/srcs/nginx
   docker images ls
@@ -121,6 +125,7 @@ START=`minikube ip | cut -d '.' -f 4`
 @ install_metallb;
 @ nginx_service;
 @ ftps_service;
-@ wordpress_service;
+@ volumes_setup;
 @ mysql_service;
+@ wordpress_service;
 @ phpmyadmin_service;

@@ -16,6 +16,7 @@ RUN rm wordpress.tar.gz
 COPY srcs/nginx.conf /etc/nginx/nginx.conf
 COPY srcs/index.html /var/www/html/
 RUN chown -R www:www /var/www/html/wordpress/
+COPY srcs/wp-config.php /var/www/html/wordpress/
 RUN chmod -R 755 /var/www/html/wordpress/
 CMD php -S 0.0.0.0:5050 -t /var/www/html/
 EXPOSE 5050

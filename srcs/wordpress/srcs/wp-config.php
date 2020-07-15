@@ -2,7 +2,7 @@
     define('DB_NAME', 'wordpress');
     define('DB_USER', 'wp-admin');
     define('DB_PASSWORD', 'password');
-    define('DB_HOST', 'mysql');
+    define('DB_HOST', '127.0.0.1:/var/lib/mysql/mysqld.sock');
     define('DB_CHARSET', 'utf8');
     define('DB_COLLATE', '');
 

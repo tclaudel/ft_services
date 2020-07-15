@@ -29,7 +29,14 @@ spec:
       labels:
         app: phpmyadmin
     spec:
+      volumes:
+        - name: phpmyadmin-pv-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
       containers:
         - name: phpmyadmin
           image: ft_phpmyadmin
           imagePullPolicy: Never
+          volumeMounts:
+            - name: phpmyadmin-pv-storage
+              mountPath: "/var/lib/mysql"

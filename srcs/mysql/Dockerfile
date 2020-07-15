@@ -14,6 +14,6 @@ COPY srcs/setup_mysql.sh ./
 RUN chmod +x setup_mysql.sh
 RUN mkdir /app
 
-CMD ./setup_mysql.sh
-
+#CMD ./setup_mysql.sh
+CMD [ "sleep", "infinity" ]
 EXPOSE 3306
