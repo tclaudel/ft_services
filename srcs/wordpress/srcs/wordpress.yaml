@@ -8,6 +8,7 @@ spec:
   type: LoadBalancer
   selector:
     app: ft_services
+    tier: wordpress
   ports:
     - name: http
       port: 5050
@@ -24,10 +25,12 @@ spec:
   selector:
     matchLabels:
       app: ft_services
+      tier: wordpress
   template:
     metadata:
       labels:
         app: ft_services
+        tier: wordpress
     spec:
       volumes:
         - name: wordpress-pv-storage

@@ -1,19 +1,13 @@
 FROM alpine:latest
 
-USER root
+RUN apk add --update mysql mysql-client && rm -f /var/cache/apk/*
 
-RUN apk -U upgrade --no-cache
-RUN apk add bash mysql mysql-client --no-cache
+VOLUME /var/lib/mysql
+WORKDIR /var/lib/mysql
 
+COPY srcs/setup_mysql.sh /setup_mysql.sh
 COPY srcs/my.cnf /etc/mysql/my.cnf
+RUN chmod +x /setup_mysql.sh
 
-RUN mkdir -p /run/mysqld
-RUN cp -rp /var/run/mysqld /var/run/mysqld.bak
-
-COPY srcs/setup_mysql.sh ./
-RUN chmod +x setup_mysql.sh
-RUN mkdir /app
-
-CMD ./setup_mysql.sh
-#CMD [ "sleep", "infinity" ]
 EXPOSE 3306
+CMD ["/setup_mysql.sh"]

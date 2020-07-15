@@ -40,6 +40,8 @@ function reset {
     kubectl delete svc $SERVICE
     kubectl delete deploy $SERVICE
   done
+  kubectl delete pv mysql-pvc
+  kubectl delete pvc mysql-pv
 }
 
 function check_fail {
