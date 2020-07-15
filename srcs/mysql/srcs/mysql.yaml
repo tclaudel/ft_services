@@ -3,11 +3,12 @@ kind: Service
 metadata:
   name: mysql
   labels:
-    app: mysql
+    app: ft_services
 spec:
   type: LoadBalancer
   selector:
-    app: mysql
+    app: ft_services
+    tier: mysql
   ports:
     - name: mysql
       port: 3306
@@ -17,17 +18,17 @@ kind: Deployment
 metadata:
   name: mysql
   labels:
-    app: mysql
+    app: ft_services
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mysql
+      app: ft_services
       tier: mysql
   template:
     metadata:
       labels:
-        app: mysql
+        app: ft_services
         tier: mysql
     spec:
       restartPolicy: Always

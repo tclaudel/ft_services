@@ -3,11 +3,11 @@ kind: Service
 metadata:
   name: phpmyadmin
   labels:
-    app: phpmyadmin
+    app: ft_services
 spec:
   type: LoadBalancer
   selector:
-    app: phpmyadmin
+    app: ft_services
   ports:
     - name: http
       port: 5000
@@ -18,16 +18,16 @@ kind: Deployment
 metadata:
   name: phpmyadmin
   labels:
-    app: phpmyadmin
+    app: ft_services
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: phpmyadmin
+      app: ft_services
   template:
     metadata:
       labels:
-        app: phpmyadmin
+        app: ft_services
     spec:
       volumes:
         - name: phpmyadmin-pv-storage
