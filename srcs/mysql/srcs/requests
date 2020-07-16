@@ -1,0 +1,5 @@
+CREATE DATABASE wordpress;
+CREATE USER 'wp_admin'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON wordpress.* TO 'wp_admin'@'%' WITH GRANT OPTION;
+ALTER USER 'wp_admin'@'%' IDENTIFIED BY 'password';
+FLUSH PRIVILEGES;

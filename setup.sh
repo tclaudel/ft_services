@@ -19,13 +19,13 @@ function get_ip_values {
   START=`minikube ip | cut -d '.' -f 4`
   CLUSTER_IP_START="$MINIKUBE_IP_1_3".$((START+1))
   CLUSTER_IP_END="$MINIKUBE_IP_1_3".256
-  IP=$(get_service_ip "wordpress")
   echo $IP
 }
 
 function get_service_ip {
   let INDEX=${SERVICES[$1]}
   INDEX=`echo ${SERVICES[@]} | tr -s " " "\n" | grep -n $1 | cut -d":" -f 1`
+  ((INDEX--))
   ((INDEX--))
   IP=`echo $CLUSTER_IP_START | cut -d '.' -f 1-3`.$((`echo $CLUSTER_IP_START | cut -d '.' -f 4` + $INDEX))
   echo $IP
@@ -59,8 +59,9 @@ function reset {
     kubectl delete svc $SERVICE
     kubectl delete deploy $SERVICE
   done
-  kubectl delete pv mysql-pvc
-  kubectl delete pvc mysql-pv
+  kubectl delete pv mysql-pv
+  kubectl delete pvc mysql-pvc
+
 }
 
 function check_fail {
@@ -81,12 +82,14 @@ function nginx_service {
 }
 
 function ftps_service {
-  sed "s/FTPS_IP/"$MINIKUBE_IP.$((START+1))"/" srcs/ftps/srcs/template_vsftpd.conf > srcs/ftps/srcs/vsftpd.conf
+  sed "s/FTPS_IP/"MINIKUBE_IP_1_3.$((START+1))"/" srcs/ftps/srcs/template_vsftpd.conf > srcs/ftps/srcs/vsftpd.conf
   docker build -t ft_ftps $WORKING_DIR/srcs/ftps
   kubectl apply -f $WORKING_DIR/srcs/ftps/srcs/ftps.yaml
 }
 
 function wordpress_service {
+  get_service_ip wordpress
+  sed "s/WORDPRESS_IP/$(get_service_ip "wordpress")/" srcs/mysql/srcs/template_wordpress.sql > srcs/mysql/srcs/wordpress.sql
   docker build -t ft_wordpress $WORKING_DIR/srcs/wordpress
   kubectl apply -f $WORKING_DIR/srcs/wordpress/srcs/wordpress.yaml
 }
@@ -102,8 +105,7 @@ function phpmyadmin_service {
 }
 
 function install_metallb {
-
-  sed "s/IPADDRESSES/"$MINIKUBE_IP.$START-$MINIKUBE_IP.254"/" srcs/metallb/template_metallb.yaml > srcs/metallb/metallb.yaml
+  sed "s/IPADDRESSES/"$MINIKUBE_IP_1_3.$((START+1))-$MINIKUBE_IP_1_3.254"/" srcs/metallb/template_metallb.yaml > srcs/metallb/metallb.yaml
   kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml
   kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/metallb.yaml
   kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"
@@ -142,13 +144,15 @@ eval $(minikube docker-env);
 @ install_minikube;
 @ starting_minikube;
 @ get_ip_values;
-#@ install_kubectl;
-#@ create_namespace;
-#eval $(minikube docker-env);
-#@ install_metallb;
-#@ nginx_service;
-#@ ftps_service;
+@ install_kubectl;
+@ create_namespace;
+eval $(minikube docker-env);
+@ get_ip_values;
+@ install_metallb;
+@ nginx_service;
+@ ftps_service;
 #@ volumes_setup;
-#@ mysql_service;
-#@ wordpress_service;
-#@ phpmyadmin_service;
+@ mysql_service;
+@ wordpress_service;
+@ phpmyadmin_service;
+
