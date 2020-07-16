@@ -26,7 +26,6 @@ function get_service_ip {
   let INDEX=${SERVICES[$1]}
   INDEX=`echo ${SERVICES[@]} | tr -s " " "\n" | grep -n $1 | cut -d":" -f 1`
   ((INDEX--))
-  ((INDEX--))
   IP=`echo $CLUSTER_IP_START | cut -d '.' -f 1-3`.$((`echo $CLUSTER_IP_START | cut -d '.' -f 4` + $INDEX))
   echo $IP
 }
