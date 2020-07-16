@@ -16,13 +16,8 @@ COPY ./srcs/wordpress.sql .
 COPY ./srcs/my.cnf /etc/mysql/my.cnf
 COPY ./srcs/my.cnf /etc/my.cnf
 
-<<<<<<< HEAD
 # Add permission
 RUN chmod 777 init_docker.sh
 RUN chmod 777 setup_mysql.sh
 
 ENTRYPOINT [ "./init_docker.sh" ]
-=======
-EXPOSE 3306
-CMD ["/setup_mysql.sh"]
->>>>>>> f09968068113be6d159e29892b91dd9d792ca55c
