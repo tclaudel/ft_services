@@ -13,6 +13,24 @@ function install_minikube {
   check_fail "installation of minikube"
 }
 
+function get_ip_values {
+  MINIKUBE_IP=`minikube ip`
+  MINIKUBE_IP_1_3=`echo $MINIKUBE_IP | cut -d '.' -f 1-3`
+  START=`minikube ip | cut -d '.' -f 4`
+  CLUSTER_IP_START="$MINIKUBE_IP_1_3".$((START+1))
+  CLUSTER_IP_END="$MINIKUBE_IP_1_3".256
+  IP=$(get_service_ip "wordpress")
+  echo $IP
+}
+
+function get_service_ip {
+  let INDEX=${SERVICES[$1]}
+  INDEX=`echo ${SERVICES[@]} | tr -s " " "\n" | grep -n $1 | cut -d":" -f 1`
+  ((INDEX--))
+  IP=`echo $CLUSTER_IP_START | cut -d '.' -f 1-3`.$((`echo $CLUSTER_IP_START | cut -d '.' -f 4` + $INDEX))
+  echo $IP
+}
+
 function check_ssh {
   IS_SSH=`cat ~/.ssh/id_rsa.pub`
   if [[ ! -n IS_SSH ]]; then
@@ -28,12 +46,13 @@ function starting_minikube {
 }
 
 function create_namespace {
-  kubectl create namespace $NAMESPACE;
+  USER_NAMESPACE=`kubectl get namespaces | grep $USER`
+  if [ -z "$USER_NAMESPACE" ]; then
+    kubectl create namespace $NAMESPACE;
+  fi
 }
 
 function reset {
-#  minikube stop;
-#  rm -Rf ~/.minikube
   kubectl delete cm config -n metallb-system
   for SERVICE in ${SERVICES[@]}
   do
@@ -95,6 +114,10 @@ function @ {
   printf "[$I] $1\n" | tr '_' ' '
   ((I++))
   eval $1
+  if [[ $? -ne 0 ]]; then
+    printf "An error occurred, exiting ..."
+    exit;
+  fi
 }
 
 SERVICES=(
@@ -105,29 +128,27 @@ SERVICES=(
   phpmyadmin
 )
 
-
-
+MINIKUBE_IP=""
+CLUSTER_IP_START=""
+CLUSTER_IP_END=""
 export SERVICES
 if [[ $1 == "reset" ]]; then
   reset;
 fi
-#minikube -p minikube docker-env
 WORKING_DIR=$PWD;
 NAMESPACE=$USER;
 I=0
 eval $(minikube docker-env);
 @ install_minikube;
 @ starting_minikube;
-MINIKUBE_IP=`minikube ip | cut -d '.' -f 1-3`
-START=`minikube ip | cut -d '.' -f 4`
-@ install_kubectl;
-@ create_namespace;
-#setup_ingress_controller;
-eval $(minikube docker-env);
-@ install_metallb;
-@ nginx_service;
-@ ftps_service;
-@ volumes_setup;
-@ mysql_service;
-@ wordpress_service;
-@ phpmyadmin_service;
+@ get_ip_values;
+#@ install_kubectl;
+#@ create_namespace;
+#eval $(minikube docker-env);
+#@ install_metallb;
+#@ nginx_service;
+#@ ftps_service;
+#@ volumes_setup;
+#@ mysql_service;
+#@ wordpress_service;
+#@ phpmyadmin_service;
