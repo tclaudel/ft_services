@@ -130,7 +130,7 @@ START=`minikube ip | cut -d '.' -f 4`
 @ install_kubectl;
 @ create_namespace;
 #setup_ingress_controller;
-@ eval $(minikube docker-env);
+eval $(minikube docker-env);
 @ install_metallb;
 @ nginx_service;
 @ ftps_service;

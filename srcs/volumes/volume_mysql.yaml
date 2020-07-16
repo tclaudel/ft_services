@@ -3,7 +3,7 @@ kind: PersistentVolume
 metadata:
   name: mysql-pv
   labels:
-    type: local
+    app: ft_services
 spec:
   storageClassName: manual
   capacity:

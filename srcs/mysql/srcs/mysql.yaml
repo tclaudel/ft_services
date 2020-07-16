@@ -2,8 +2,18 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mysql
+<<<<<<< HEAD
 spec:
   type: ClusterIP
+=======
+  labels:
+    app: ft_services
+spec:
+  type: LoadBalancer
+  selector:
+    app: ft_services
+    tier: mysql
+>>>>>>> f09968068113be6d159e29892b91dd9d792ca55c
   ports:
   - name: mysql
     port: 3306
@@ -43,16 +53,26 @@ kind: Deployment
 metadata:
   name: mysql
   labels:
-    app: mysql
+    app: ft_services
 spec:
   replicas: 1
   selector:
     matchLabels:
+<<<<<<< HEAD
       app: mysql
   template:
     metadata:
       labels:
         app: mysql
+=======
+      app: ft_services
+      tier: mysql
+  template:
+    metadata:
+      labels:
+        app: ft_services
+        tier: mysql
+>>>>>>> f09968068113be6d159e29892b91dd9d792ca55c
     spec:
       containers:
         - name: mysql

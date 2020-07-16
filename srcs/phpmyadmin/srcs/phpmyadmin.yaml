@@ -1,3 +1,4 @@
+<<<<<<< HEAD
   apiVersion: v1
   kind: Service
   metadata:
@@ -14,6 +15,22 @@
       app: phpmyadmin
       tier: mysql
     type: LoadBalancer
+=======
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpmyadmin
+  labels:
+    app: phpmyadmin
+spec:
+  type: LoadBalancer
+  selector:
+    app: phpmyadmin
+  ports:
+    - name: http
+      port: 5000
+      targetPort: 5000
+>>>>>>> f09968068113be6d159e29892b91dd9d792ca55c
 ---
 apiVersion: apps/v1
 kind: Deployment
