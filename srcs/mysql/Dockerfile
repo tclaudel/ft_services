@@ -1,13 +1,23 @@
 FROM alpine:latest
 
-RUN apk add --update mysql mysql-client && rm -f /var/cache/apk/*
+# installation
+RUN apk update \
+&& apk add mariadb mariadb-client && apk add --no-cache --upgrade bash \
+&& rm -rf /var/cache/apk/*
+RUN apk add openrc vim --no-cache
 
-VOLUME /var/lib/mysql
-WORKDIR /var/lib/mysql
+# RUN service mysql start
+RUN mysql --version
 
-COPY srcs/setup_mysql.sh /setup_mysql.sh
-COPY srcs/my.cnf /etc/mysql/my.cnf
-RUN chmod +x /setup_mysql.sh
+# Copy initialisation script
+COPY ./srcs/init_docker.sh .
+COPY ./srcs/setup_mysql.sh .
+COPY ./srcs/wordpress.sql .
+COPY ./srcs/my.cnf /etc/mysql/my.cnf
+COPY ./srcs/my.cnf /etc/my.cnf
 
-EXPOSE 3306
-CMD ["/setup_mysql.sh"]
+# Add permission
+RUN chmod 777 init_docker.sh
+RUN chmod 777 setup_mysql.sh
+
+ENTRYPOINT [ "./init_docker.sh" ]

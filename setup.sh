@@ -28,7 +28,10 @@ function starting_minikube {
 }
 
 function create_namespace {
-  kubectl create namespace $NAMESPACE;
+  USER_NAMESPACE=`kubectl get namespaces | grep $USER`
+  if [ -z "$USER_NAMESPACE" ]; then
+    kubectl create namespace $NAMESPACE;
+  fi
 }
 
 function reset {
@@ -40,6 +43,8 @@ function reset {
     kubectl delete svc $SERVICE
     kubectl delete deploy $SERVICE
   done
+  kubectl delete pv mysql-pv
+  kubectl delete pvc mysql-pvc
 }
 
 function check_fail {
@@ -90,9 +95,13 @@ function install_metallb {
 }
 
 function @ {
-  printf "[$I] $1\n"
+  printf "[$I] $1\n" | tr '_' ' '
   ((I++))
   eval $1
+  if [[ $? -ne 0 ]];then
+    printf "An error occurred, exiting ..."
+    exit;
+  fi
 }
 
 SERVICES=(
@@ -125,7 +134,7 @@ START=`minikube ip | cut -d '.' -f 4`
 @ install_metallb;
 @ nginx_service;
 @ ftps_service;
-@ volumes_setup;
+#@ volumes_setup;
 @ mysql_service;
 @ wordpress_service;
 @ phpmyadmin_service;

@@ -5,16 +5,17 @@ metadata:
   labels:
     app: wordpress
 spec:
-  type: LoadBalancer
+  ports:
+    - port: 5050
+      targetPort: 5050
+      protocol: TCP
+      name: wordpress
   selector:
     app: wordpress
-    tier: wordpress
-  ports:
-    - name: http
-      port: 5050
-      targetPort: 5050
+    tier: mysql
+  type: LoadBalancer
 ---
-apiVersion: apps/v1
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
   name: wordpress
@@ -25,19 +26,28 @@ spec:
   selector:
     matchLabels:
       app: wordpress
+      tier: mysql
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
         app: wordpress
+        tier: mysql
     spec:
-      volumes:
-        - name: wordpress-pv-storage
-          persistentVolumeClaim:
-            claimName: mysql-pvc
       containers:
-        - name: wordpress
-          image: ft_wordpress
-          imagePullPolicy: Never
-          volumeMounts:
-            - name: wordpress-pv-storage
-              mountPath: "/var/lib/mysql"
+      - image: ft_wordpress
+        name: wordpress
+        env:
+          - name: DB_NAME
+            value: wordpress
+          - name: DB_USER
+            value: wp_admin
+          - name: DB_PASSWORD
+            value: admin
+          - name: DB_HOST
+            value: mysql-svc
+        ports:
+        - containerPort: 5050
+          name: wordpress
+        imagePullPolicy: Never

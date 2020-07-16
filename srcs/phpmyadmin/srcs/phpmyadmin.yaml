@@ -1,18 +1,19 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: phpmyadmin
-  labels:
-    app: wordpress
-spec:
-  type: LoadBalancer
-  selector:
-    app: wordpress
-    tier: wordpress
-  ports:
-    - name: http
-      port: 5000
-      targetPort: 5000
+  apiVersion: v1
+  kind: Service
+  metadata:
+    name: phpmyadmin
+    labels:
+      app: phpmyadmin
+  spec:
+    ports:
+      - port: 5000
+        targetPort: 5000
+        protocol: TCP
+        name: phpmyadmin
+    selector:
+      app: phpmyadmin
+      tier: mysql
+    type: LoadBalancer
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -25,19 +26,28 @@ spec:
   selector:
     matchLabels:
       app: phpmyadmin
+      tier: mysql
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:
         app: phpmyadmin
+        tier: mysql
     spec:
-      volumes:
-        - name: phpmyadmin-pv-storage
-          persistentVolumeClaim:
-            claimName: mysql-pvc
       containers:
-        - name: phpmyadmin
-          image: ft_phpmyadmin
-          imagePullPolicy: Never
-          volumeMounts:
-            - name: phpmyadmin-pv-storage
-              mountPath: "/var/lib/mysql"
+      - name: phpmyadmin
+        image: ft_phpmyadmin
+        ports:
+          - containerPort: 5000
+            name: phpmyadmin
+        env:
+          - name: PMA_HOST
+            value: mysql
+          - name: PMA_PORT
+            value: "3306"
+          - name: PMA_USER
+            value: wp_admin
+          - name: MYSQL_ROOT_PASSWORD
+            value: password
+        imagePullPolicy: Never
