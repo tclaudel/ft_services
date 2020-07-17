@@ -79,7 +79,7 @@ function nginx_service {
 }
 
 function ftps_service {
-  sed "s/FTPS_IP/"MINIKUBE_IP_1_3.$((START+1))"/" srcs/ftps/srcs/template_vsftpd.conf > srcs/ftps/srcs/vsftpd.conf
+  sed "s/FTPS_IP/"`get_service_ip ftps`"/" srcs/ftps/srcs/template_vsftpd.conf > srcs/ftps/srcs/vsftpd.conf
   docker build -t ft_ftps $WORKING_DIR/srcs/ftps
   kubectl apply -f $WORKING_DIR/srcs/ftps/srcs/ftps.yaml
 }
@@ -119,6 +119,17 @@ function install_metallb {
   kubectl apply -f $WORKING_DIR/srcs/metallb/metallb.yaml
 }
 
+function display_services_access {
+  NGINX_IP=`get_service_ip nginx`
+  WORDPRESS_IP=`get_service_ip wordpress`
+  PHP_MY_ADMIN_IP=`get_service_ip phpmyadmin`
+  FTPS_IP=`get_service_ip ftps`
+  printf "NGINX :\t\thttp://$NGINX_IP:80\n\t\thttps://$NGINX_IP:443\n"
+  printf "WORDPRESS :\thttp://$WORDPRESS_IP:5050\n"
+  printf "PHP_MY_ADMIN :\thttp://$PHP_MY_ADMIN_IP:5000\twp_admin/password\n"
+  printf "FTPS : \t\t$FTPS_IP\t\t\tadmin/password/21\n"
+}
+
 function @ {
   printf "[$I] $1\n" | tr '_' ' '
   ((I++))
@@ -133,10 +144,10 @@ SERVICES=(
   nginx
   ftps
   wordpress
-  mysql
   phpmyadmin
   grafana
   influxdb
+  mysql
 )
 
 MINIKUBE_IP=""
@@ -165,3 +176,4 @@ eval $(minikube docker-env);
 @ phpmyadmin_service;
 @ grafana_service;
 @ influxdb_service;
+@ display_services_access;
