@@ -59,7 +59,9 @@ function reset {
     kubectl delete deploy $SERVICE
   done
   kubectl delete pv mysql-pv
+  kubectl delete pv influxdb-pv-volume
   kubectl delete pvc mysql-pvc
+  kubectl delete pvc influxdb-pv-claim
 
 }
 
@@ -68,10 +70,6 @@ function check_fail {
     echo $1" failed\nExiting...";
     exit 1;
   fi
-}
-
-function volumes_setup {
-  kubectl apply -f $WORKING_DIR/srcs/volumes/volume_mysql.yaml
 }
 
 function nginx_service {
@@ -103,6 +101,16 @@ function phpmyadmin_service {
   kubectl apply -f $WORKING_DIR/srcs/phpmyadmin/srcs/phpmyadmin.yaml
 }
 
+function influxdb_service {
+  docker build -t ft_influxdb $WORKING_DIR/srcs/influxdb
+  kubectl apply -f $WORKING_DIR/srcs/influxdb/srcs/influxdb.yaml
+}
+
+function grafana_service {
+  docker build -t ft_grafana $WORKING_DIR/srcs/grafana
+  kubectl apply -f $WORKING_DIR/srcs/grafana/srcs/grafana.yaml
+}
+
 function install_metallb {
   sed "s/IPADDRESSES/"$MINIKUBE_IP_1_3.$((START+1))-$MINIKUBE_IP_1_3.254"/" srcs/metallb/template_metallb.yaml > srcs/metallb/metallb.yaml
   kubectl apply -f https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml
@@ -127,6 +135,8 @@ SERVICES=(
   wordpress
   mysql
   phpmyadmin
+  grafana
+  influxdb
 )
 
 MINIKUBE_IP=""
@@ -150,8 +160,8 @@ eval $(minikube docker-env);
 @ install_metallb;
 @ nginx_service;
 @ ftps_service;
-#@ volumes_setup;
 @ mysql_service;
 @ wordpress_service;
 @ phpmyadmin_service;
-
+@ grafana_service;
+@ influxdb_service;
