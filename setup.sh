@@ -127,8 +127,8 @@ function display_services_access {
   GRAFANA_IP=`get_service_ip grafana`
   printf "NGINX :\t\thttp://$NGINX_IP:80\n\t\thttps://$NGINX_IP:443\n"
   printf "WORDPRESS :\thttp://$WORDPRESS_IP:5050\n"
-  printf "PHP_MY_ADMIN :\thttp://$PHP_MY_ADMIN_IP:5000\twp_admin/password\n"
-  printf "GRAFANA :\thttp://$GRAFANA_IP:3000\tadmin/admin\n"
+  printf "PHP_MY_ADMIN :\thttp://$PHP_MY_ADMIN_IP:5000\tadmin/password\n"
+  printf "GRAFANA :\thttp://$GRAFANA_IP:3000\tadmin/password\n"
   printf "FTPS : \t\t$FTPS_IP\t\t\tadmin/password/21\n"
 }
 function @ {
