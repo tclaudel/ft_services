@@ -1,48 +1,19 @@
-ARG BASE_IMAGE=alpine:3.11.6
-FROM ${BASE_IMAGE}
+FROM alpine:latest
 
-ENV GRAFANA_VERSION=7.0.0
-RUN mkdir /tmp/grafana \
-  && wget -P /tmp/ https://dl.grafana.com/oss/release/grafana-${GRAFANA_VERSION}.linux-amd64.tar.gz \
-  && tar xfz /tmp/grafana-${GRAFANA_VERSION}.linux-amd64.tar.gz --strip-components=1 -C /tmp/grafana
+RUN apk add grafana --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --no-cache
 
+RUN apk add openrc
+COPY srcs/grafana.ini /etc/grafana/grafana.ini
+COPY srcs/dashboards /var/lib/grafana/dashboards/
+COPY srcs/provisioning/dashboards/dashboards.yaml /usr/share/grafana/conf/provisioning/dashboards/
+COPY srcs/provisioning/datasources/influxdb.yaml /usr/share/grafana/conf/provisioning/datasources/
+RUN apk add telegraf --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted --no-cache 
 
-ARG BASE_IMAGE=alpine:3.11.6
-FROM ${BASE_IMAGE}
+RUN openrc
+RUN touch /run/openrc/softlevel
 
-ENV PATH=/usr/share/grafana/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    GF_PATHS_CONFIG="/etc/grafana/grafana.ini" \
-    GF_PATHS_DATA="/var/lib/grafana" \
-    GF_PATHS_HOME="/usr/share/grafana" \
-    GF_PATHS_LOGS="/var/log/grafana" \
-    GF_PATHS_PLUGINS="/var/lib/grafana/plugins" \
-    GF_PATHS_PROVISIONING="/etc/grafana/provisioning"
-
-WORKDIR $GF_PATHS_HOME    
-
-RUN set -ex \
-    && addgroup -S grafana \
-    && adduser -S -G grafana grafana \
-    && apk add --no-cache libc6-compat ca-certificates su-exec bash
-
-COPY --from=0 /tmp/grafana "$GF_PATHS_HOME"
-RUN mkdir -p "$GF_PATHS_HOME/.aws" \
-    && mkdir -p "$GF_PATHS_PROVISIONING/datasources" \
-        "$GF_PATHS_PROVISIONING/dashboards" \
-        "$GF_PATHS_PROVISIONING/notifiers" \
-        "$GF_PATHS_LOGS" \
-        "$GF_PATHS_PLUGINS" \
-        "$GF_PATHS_DATA" \
-    && chown -R grafana:grafana "$GF_PATHS_DATA" "$GF_PATHS_HOME/.aws" "$GF_PATHS_LOGS" "$GF_PATHS_PLUGINS" "$GF_PATHS_PROVISIONING" \
-    && chmod -R 777 "$GF_PATHS_DATA" "$GF_PATHS_HOME/.aws" "$GF_PATHS_LOGS" "$GF_PATHS_PLUGINS" "$GF_PATHS_PROVISIONING"
-
-#COPY ./srcs/grafana.ini "$GF_PATHS_CONFIG"
-RUN mkdir -p /etc/grafana/provisioning/dashboards
-COPY srcs/datasources.yml /usr/share/grafana/conf/provisioning/datasources/
-COPY srcs/dashboard.yml /usr/share/grafana/conf/provisioning/dashboards/
-COPY ./run.sh /run.sh
-COPY ./srcs/*.json /grafana/dashboards/
-
+RUN mkdir /etc/telegraf/
+COPY srcs/telegraf.conf /etc/telegraf/telegraf.conf
 EXPOSE 3000
 
-CMD ["/run.sh"]
+ENTRYPOINT  telegraf --config /etc/telegraf/telegraf.conf &  /usr/sbin/grafana-server --config=/etc/grafana/grafana.ini --homepath=/usr/share/grafana

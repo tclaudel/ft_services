@@ -59,9 +59,9 @@ function reset {
     kubectl delete deploy $SERVICE
   done
   kubectl delete pv mysql-pv
-  kubectl delete pv influxdb-pv-volume
+  kubectl delete pv influxdb-pv
   kubectl delete pvc mysql-pvc
-  kubectl delete pvc influxdb-pv-claim
+  kubectl delete pvc influxdb-pvc
 
 }
 
@@ -170,11 +170,11 @@ eval $(minikube docker-env);
 eval $(minikube docker-env);
 @ get_ip_values;
 @ install_metallb;
+@ influxdb_service;
 @ nginx_service;
 @ ftps_service;
 @ mysql_service;
 @ wordpress_service;
 @ phpmyadmin_service;
 @ grafana_service;
-@ influxdb_service;
 @ display_services_access;

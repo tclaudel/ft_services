@@ -8,7 +8,13 @@ RUN apk add openssl \
     && apk add zsh --no-cache
 
 RUN adduser -D -g www www
+RUN apk add telegraf --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ --allow-untrusted --no-cache 
+RUN apk add openrc
+RUN openrc
+RUN touch /run/openrc/softlevel
 
+RUN mkdir /etc/telegraf/
+COPY srcs/telegraf.conf /etc/telegraf/telegraf.conf
 # We setup web server files and permissions
 RUN mkdir /www
 RUN chown -R www:www /var/lib/nginx
@@ -27,6 +33,7 @@ RUN chmod 600 /etc/ssh/ssh_host_rsa_key
 
 COPY srcs/nginx.conf /etc/nginx/nginx.conf
 COPY srcs/index.html /var/www/html/
-CMD /usr/sbin/sshd; nginx -g 'daemon off;'
+# /etc/init.d/
+CMD telegraf --config /etc/telegraf/telegraf.conf & /usr/sbin/sshd; nginx -g 'daemon off;'
 
 EXPOSE 22 80 443

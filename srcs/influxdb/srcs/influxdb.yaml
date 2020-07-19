@@ -15,7 +15,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: influxdb-pv-volume
+  name: influxdb-pv
   labels:
     type: local
 spec:
@@ -25,16 +25,15 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/data"
+    path: "/mnt/data"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: influxdb-pv-claim
+  name: influxdb-pvc
 spec:
-  storageClassName: manual
   accessModes:
-  - ReadWriteOnce
+    - ReadWriteOnce
   resources:
     requests:
       storage: 100Mi
@@ -43,29 +42,27 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: influxdb
+  labels:
+    app: ft_services
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: influxdb
-  replicas: 1
   template:
     metadata:
       labels:
         app: influxdb
     spec:
       containers:
-      - name: influxdb
-        image: ft_influxdb
-        imagePullPolicy: Never
-        securityContext:
-          privileged: true
-        ports:
         - name: influxdb
-          containerPort: 8086
-        volumeMounts:
-        - name: influxdb-persistent-storage
-          mountPath: /var/lib/influxdb
+          image: ft_influxdb
+          volumeMounts:
+            - mountPath: "/var/lib/influxdb"
+              subPath: "influxdb"
+              name: influxdb-data
+          imagePullPolicy: Never  
       volumes:
-      - name: influxdb-persistent-storage
+      - name: influxdb-data
         persistentVolumeClaim:
-          claimName: influxdb-pv-claim
+          claimName: influxdb-pvc
