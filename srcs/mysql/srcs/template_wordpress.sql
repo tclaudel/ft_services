@@ -468,7 +468,7 @@ CREATE TABLE `wp_users` (
 --
 
 INSERT INTO `wp_users` (`ID`, `user_login`, `user_pass`, `user_nicename`, `user_email`, `user_url`, `user_registered`, `user_activation_key`, `user_status`, `display_name`) VALUES
-(1, 'admin', '$P$BW4nw/rkzau8YOyCMIFLdsYS7vVnLH/', 'admin', 'admin@admin.admin', 'http://WORDPRESS_IP:5050', '2020-07-17 07:17:11', '', 0, 'admin'),
+(1, 'admin', '$P$BW4nw/rkzau8YOyCMIFLdsYS7vVnLH/', 'admin', 'admin@admin.admin', '', '2020-07-17 07:17:11', '', 0, 'admin'),
 (2, 'user', '$P$Bu5nRP7YCW5vJ/nN694z5wl6h3ooNc0', 'user', 'user@user.user', '', '2020-07-17 07:18:24', '1594970304:$P$B6p9srMvVh2Rgza/Cfg6DRS8MCXZre0', 0, 'user user'),
 (3, 'user1', '$P$BftUFugssui5GaiNHJ/HCbtMI.AWId0', 'user1', 'user1@user1.user1', '', '2020-07-17 07:19:22', '1594970362:$P$BhHN/zSeI/Yy283l4Sj/kzKxl/4Sxk1', 0, 'user1 user1');
 
