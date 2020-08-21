@@ -58,8 +58,7 @@ spec:
         - name: influxdb
           image: ft_influxdb
           volumeMounts:
-            - mountPath: "/var/lib/influxdb"
-              subPath: "influxdb"
+            - mountPath: /var/lib/influxdb
               name: influxdb-data
           imagePullPolicy: Never  
       volumes:

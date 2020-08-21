@@ -125,12 +125,13 @@ function display_services_access {
   PHP_MY_ADMIN_IP=`get_service_ip phpmyadmin`
   FTPS_IP=`get_service_ip ftps`
   GRAFANA_IP=`get_service_ip grafana`
-  printf "NGINX :\t\thttp://$NGINX_IP:80\n\t\thttps://$NGINX_IP:443\n"
+  printf "NGINX :\t\thttp://$NGINX_IP:80\n\t\thttps://$NGINX_IP:443\n\t\tssh admin@$NGINX_IP\tadmin/password\n"
   printf "WORDPRESS :\thttp://$WORDPRESS_IP:5050\n"
   printf "PHP_MY_ADMIN :\thttp://$PHP_MY_ADMIN_IP:5000\tadmin/password\n"
   printf "GRAFANA :\thttp://$GRAFANA_IP:3000\tadmin/password\n"
   printf "FTPS : \t\t$FTPS_IP\t\t\tadmin/password/21\n"
 }
+
 function @ {
   printf "[$I] $1\n" | tr '_' ' '
   ((I++))
