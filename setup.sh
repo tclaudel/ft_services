@@ -9,7 +9,6 @@ function install_minikube {
   sudo mkdir -p /urs/local/bin/;
   sudo install minikube /usr/local/bin/
   sudo install minikube-linux-amd64 /usr/local/bin/minikube;
-  check_fail "installation of minikube"
 }
 
 function get_ip_values {
