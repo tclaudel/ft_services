@@ -5,10 +5,19 @@ function install_kubectl {
 }
 
 function install_minikube {
-  curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube;
-  sudo mkdir -p /urs/local/bin/;
-  sudo install minikube /usr/local/bin/
-  # sudo install minikube-linux-amd64 /usr/local/bin/minikube;
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    if [[ $PWD != *goinfre* ]]; then
+      read -p "If you are in a 42 cluster, make sure you are in groinfre ! Continue ? (y/n)" SURE;
+    fi
+    export MINIKUBE_HOME=$PWD
+    brew install minikube
+  else
+    curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube;
+    mkdir -p /urs/local/bin/;
+    install minikube /usr/local/bin/
+    sudo mkdir -p /urs/local/bin/;
+    sudo install minikube /usr/local/bin/
+  fi
 }
 
 function get_ip_values {
@@ -38,7 +47,7 @@ function check_ssh {
 }
 
 function starting_minikube {
-  minikube start;
+  minikube start --vm-driver=virtualbox;
   minikube status;
 }
 
